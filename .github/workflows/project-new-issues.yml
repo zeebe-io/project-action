@@ -1,0 +1,19 @@
+name: Assign new issues to the test project
+on:
+  issue:
+    types: [ opened, reopened ]
+jobs:
+  assign:
+    name: Assign to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # required to find all branches
+          fetch-depth: 0
+      - name: Assign to project
+        uses: zeebe-io/project-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_workspace: ${{ github.workspace }}
+          version: master

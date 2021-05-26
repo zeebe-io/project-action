@@ -1,0 +1,13 @@
+name: "project-action"
+description: "Automatically updates project information for issues"
+author: "zeebe-io"
+inputs:
+  github_token:
+    description: Token for the GitHub API
+    required: true
+  project_id:
+    description: The ID of the project to assign to the issue
+    required: true
+runs:
+  using: "node12"
+  main: "dist/index.js"

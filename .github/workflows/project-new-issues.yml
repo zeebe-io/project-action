@@ -1,6 +1,6 @@
 name: Assign new issues to the test project
 on:
-  issue:
+  issues:
     types: [ opened, reopened ]
 jobs:
   assign:
@@ -12,7 +12,7 @@ jobs:
           # required to find all branches
           fetch-depth: 0
       - name: Assign to project
-        uses: zeebe-io/project-action@master
+        uses: zeebe-io/project-action@develop
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           project_id: 1

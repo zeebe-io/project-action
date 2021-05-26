@@ -14,7 +14,7 @@ jobs:
       - name: Assign to project
         uses: zeebe-io/project-action@develop
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ORG_TOKEN }}
           project_type: "org"
           project_owner: "zeebe-io"
           project_name: "Zeebe"

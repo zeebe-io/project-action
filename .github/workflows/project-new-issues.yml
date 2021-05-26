@@ -15,7 +15,6 @@ jobs:
         uses: zeebe-io/project-action@develop
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          project_type: "repo"
+          project_type: "org"
           project_owner: "zeebe-io"
-          project_repo: "project-action"
-          project_name: "Test"
+          project_name: "Zeebe"

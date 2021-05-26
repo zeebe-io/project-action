@@ -66,12 +66,12 @@ class Github {
         __classPrivateFieldSet(this, _octokit, github.getOctokit(token));
         __classPrivateFieldSet(this, _context, github.context);
     }
-    setProject(projectId, note) {
+    setProject(projectId, issueTitle) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueId = __classPrivateFieldGet(this, _context).issue.number;
-            console.log(`Assigning project ${projectId} to issue ${issueId}`);
+            console.log(`Assigning issue "${issueTitle}" (#${issueId}) to project ${projectId}`);
             return __classPrivateFieldGet(this, _octokit).projects.createCard({
-                note: note,
+                note: issueTitle,
                 content_id: issueId,
                 content_type: "issue",
             });

@@ -26,7 +26,9 @@ export class Github implements GithubApi {
 
   public async setProject(projectId: number, issueTitle: string) {
     const issueId = this.#context.issue.number;
-    console.log(`Assigning issue "${issueTitle}" (#${issueId}) to project ${projectId}`);
+    console.log(
+      `Assigning issue "${issueTitle}" (#${issueId}) to project ${projectId}`
+    );
     return this.#octokit.projects.createCard({
       note: issueTitle,
       content_id: issueId,

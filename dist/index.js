@@ -97,6 +97,9 @@ class Github {
     }
     getProjectId(input) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (input.id && input.id !== "") {
+                return Promise.resolve(input.id);
+            }
             return this.listProjects(input).then((projects) => {
                 console.log(`Found #${projects === null || projects === void 0 ? void 0 : projects.length} projects for the given input: ${input}`);
                 const projectId = projects.find((project) => project.name === input.name).node_id;
@@ -139,11 +142,12 @@ class Github {
 exports.Github = Github;
 _octokit = new WeakMap(), _context = new WeakMap();
 class ProjectInput {
-    constructor(type, owner, repo, name) {
+    constructor(type, owner, repo, name, id) {
         this.type = type;
         this.owner = owner;
         this.repo = repo;
         this.name = name;
+        this.id = id;
     }
 }
 exports.ProjectInput = ProjectInput;
@@ -195,11 +199,12 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput("github_token", { required: true });
         const hub = new github_1.Github(token);
-        const project_type = core.getInput("project_type", { required: true });
-        const project_owner = core.getInput("project_owner", { required: true });
+        const project_type = core.getInput("project_type", { required: false });
+        const project_owner = core.getInput("project_owner", { required: false });
         const project_repo = core.getInput("project_repo", { required: false });
-        const project_name = core.getInput("project_name", { required: true });
-        const input = new github_1.ProjectInput(project_type, project_owner, project_repo, project_name);
+        const project_name = core.getInput("project_name", { required: false });
+        const project_id = core.getInput("project_id", { required: false });
+        const input = new github_1.ProjectInput(project_type, project_owner, project_repo, project_name, project_id);
         const project = new project_1.Project(input, hub);
         return project.run();
     });

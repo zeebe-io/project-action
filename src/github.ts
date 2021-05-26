@@ -60,6 +60,10 @@ export class Github implements GithubApi {
   }
 
   public async getProjectId(input: ProjectInput) {
+    if (input.id && input.id !== "") {
+      return Promise.resolve(input.id);
+    }
+
     return this.listProjects(input).then((projects) => {
       console.log(
         `Found #${projects?.length} projects for the given input: ${input}`
@@ -110,11 +114,19 @@ export class ProjectInput {
   public owner;
   public repo;
   public name;
+  public id;
 
-  constructor(type: string, owner: string, repo: string, name: string) {
+  constructor(
+    type: string,
+    owner: string,
+    repo: string,
+    name: string,
+    id: string
+  ) {
     this.type = type;
     this.owner = owner;
     this.repo = repo;
     this.name = name;
+    this.id = id;
   }
 }

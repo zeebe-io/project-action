@@ -6,21 +6,24 @@ inputs:
     description: Token for the GitHub API
     required: true
   project_type:
-    description: "The type of project: org, repo, user"
-    required: true
+    description: "The type of project: org, repo, user. If project_id is specified, this is ignored."
+    required: false
   project_owner:
     description: |
       The owner of the project; depending on the type, it will be:
         - owner of the repo
         - the user
         - the org
-    required: true
+    required: false
   project_repo:
     description: "The repository of the project (if any)"
     required: false
   project_name:
     description: "The name of the project"
-    required: true
+    required: false
+  project_id:
+    description: "The project's node ID if known in advance"
+    required: false
 runs:
   using: "node12"
   main: "dist/index.js"

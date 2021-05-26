@@ -1,22 +1,26 @@
 import * as core from "@actions/core";
-import { GithubApi } from "./github";
+import { GithubApi, ProjectInput } from "./github";
 
 export class Project {
-  private projectId;
+  private input;
   private hub;
 
-  constructor(projectId: number, hub: GithubApi) {
-    this.projectId = projectId;
+  constructor(input: ProjectInput, hub: GithubApi) {
+    this.input = input;
     this.hub = hub;
   }
 
   async run(): Promise<void> {
     return this.hub
-      .getIssueTitle()
-      .then((title) => this.hub.setProject(this.projectId, title))
-      .then(() =>
-        console.log(`Assigned new issue to project ${this.projectId}`)
-      )
+      .getIssueId()
+      .then((issueId) => {
+        this.hub
+          .getProjectId(this.input)
+          .then((projectId) => this.hub.setProject(issueId, projectId))
+          .then(() =>
+            console.log(`Assigned new issue to project ${this.input.name}`)
+          );
+      })
       .catch((error) => {
         console.error(error.message);
         core.setFailed(error.message);

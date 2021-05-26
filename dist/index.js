@@ -57,7 +57,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _octokit, _context;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Github = void 0;
+exports.ProjectInput = exports.Github = void 0;
 const github = __importStar(__nccwpck_require__(438));
 class Github {
     constructor(token) {
@@ -66,18 +66,22 @@ class Github {
         __classPrivateFieldSet(this, _octokit, github.getOctokit(token));
         __classPrivateFieldSet(this, _context, github.context);
     }
-    setProject(projectId, issueTitle) {
+    setProject(issueId, projectId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const issueId = __classPrivateFieldGet(this, _context).issue.number;
-            console.log(`Assigning issue "${issueTitle}" (#${issueId}) to project ${projectId}`);
-            return __classPrivateFieldGet(this, _octokit).projects.createCard({
-                note: issueTitle,
-                content_id: issueId,
-                content_type: "issue",
-            });
+            const variables = { issueId: issueId, projectId: projectId };
+            const query = `
+        mutation($issueId:ID!, $projectId:ID!) {
+            updateIssue(input: { id: $issueId, projectIds: [$projectId] }) {
+                issue {
+                    id
+                }
+            }
+        }
+    `;
+            return __classPrivateFieldGet(this, _octokit).graphql(query, variables).then((response) => { });
         });
     }
-    getIssueTitle() {
+    getIssueId() {
         return __awaiter(this, void 0, void 0, function* () {
             return __classPrivateFieldGet(this, _octokit).issues
                 .get({
@@ -85,12 +89,60 @@ class Github {
                 repo: __classPrivateFieldGet(this, _context).issue.repo,
                 issue_number: __classPrivateFieldGet(this, _context).issue.number,
             })
-                .then((response) => response.data.title);
+                .then((issue) => {
+                console.log(`Found node ID issue #${issue.data.node_id} for issue #${__classPrivateFieldGet(this, _context).issue.number}`);
+                return issue.data.node_id;
+            });
+        });
+    }
+    getProjectId(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.listProjects(input).then((projects) => {
+                console.log(`Found #${projects === null || projects === void 0 ? void 0 : projects.length} projects for the given input: ${input}`);
+                const projectId = projects.find((project) => project.name === input.name).node_id;
+                console.log(`Found ID ${projectId} for the given input: ${input}`);
+                return projectId;
+            });
+        });
+    }
+    listProjects(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (input.type === "org") {
+                return __classPrivateFieldGet(this, _octokit).projects
+                    .listForOrg({
+                    org: input.owner,
+                })
+                    .then((response) => response.data);
+            }
+            if (input.type === "repo") {
+                return __classPrivateFieldGet(this, _octokit).projects
+                    .listForRepo({
+                    owner: input.owner,
+                    repo: input.repo,
+                })
+                    .then((response) => response.data);
+            }
+            if (input.type === "user") {
+                return __classPrivateFieldGet(this, _octokit).projects
+                    .listForUser({
+                    username: input.owner,
+                })
+                    .then((response) => response.data);
+            }
         });
     }
 }
 exports.Github = Github;
 _octokit = new WeakMap(), _context = new WeakMap();
+class ProjectInput {
+    constructor(type, owner, repo, name) {
+        this.type = type;
+        this.owner = owner;
+        this.repo = repo;
+        this.name = name;
+    }
+}
+exports.ProjectInput = ProjectInput;
 
 
 /***/ }),
@@ -138,9 +190,13 @@ const project_1 = __nccwpck_require__(389);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput("github_token", { required: true });
-        const projectId = +core.getInput("project_id", { required: true });
         const hub = new github_1.Github(token);
-        const project = new project_1.Project(projectId, hub);
+        const project_type = core.getInput("project_type", { required: true });
+        const project_owner = core.getInput("project_owner", { required: true });
+        const project_repo = core.getInput("project_repo", { required: false });
+        const project_name = core.getInput("project_name", { required: true });
+        const input = new github_1.ProjectInput(project_type, project_owner, project_repo, project_name);
+        const project = new project_1.Project(input, hub);
         return project.run();
     });
 }
@@ -187,16 +243,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Project = void 0;
 const core = __importStar(__nccwpck_require__(186));
 class Project {
-    constructor(projectId, hub) {
-        this.projectId = projectId;
+    constructor(input, hub) {
+        this.input = input;
         this.hub = hub;
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.hub
-                .getIssueTitle()
-                .then((title) => this.hub.setProject(this.projectId, title))
-                .then(() => console.log(`Assigned new issue to project ${this.projectId}`))
+                .getIssueId()
+                .then((issueId) => {
+                this.hub
+                    .getProjectId(this.input)
+                    .then((projectId) => this.hub.setProject(issueId, projectId))
+                    .then(() => console.log(`Assigned new issue to project ${this.input.name}`));
+            })
                 .catch((error) => {
                 console.error(error.message);
                 core.setFailed(error.message);

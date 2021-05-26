@@ -7,7 +7,7 @@ import { Project } from "./project";
  */
 async function run(): Promise<void> {
   const token = core.getInput("github_token", { required: true });
-  const projectId : number = +core.getInput("project_id", { required: true });
+  const projectId: number = +core.getInput("project_id", { required: true });
   const hub = new Github(token);
   const project = new Project(projectId, hub);
 

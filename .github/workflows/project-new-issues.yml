@@ -15,4 +15,4 @@ jobs:
         uses: zeebe-io/project-action@develop
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          project_id: 1
+          project_id: 12542822

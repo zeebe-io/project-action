@@ -79,7 +79,11 @@ export class Github implements GithubApi {
         .listForOrg({
           org: input.owner,
         })
-        .then((response) => response.data);
+        .then((response) => response.data)
+        .catch((error) => {
+          console.error(error);
+          return [];
+        });
     }
 
     if (input.type === "repo") {

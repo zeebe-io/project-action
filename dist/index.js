@@ -112,7 +112,11 @@ class Github {
                     .listForOrg({
                     org: input.owner,
                 })
-                    .then((response) => response.data);
+                    .then((response) => response.data)
+                    .catch((error) => {
+                    console.error(error);
+                    return [];
+                });
             }
             if (input.type === "repo") {
                 return __classPrivateFieldGet(this, _octokit).projects
@@ -249,18 +253,16 @@ class Project {
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.hub
-                .getIssueId()
-                .then((issueId) => {
-                this.hub
-                    .getProjectId(this.input)
-                    .then((projectId) => this.hub.setProject(issueId, projectId))
-                    .then(() => console.log(`Assigned new issue to project ${this.input.name}`));
-            })
-                .catch((error) => {
+            try {
+                const issueId = yield this.hub.getIssueId();
+                const projectId = yield this.hub.getProjectId(this.input);
+                yield this.hub.setProject(issueId, projectId);
+                console.log(`Assigned new issue to project ${this.input.name}`);
+            }
+            catch (error) {
                 console.error(error.message);
                 core.setFailed(error.message);
-            });
+            }
         });
     }
 }

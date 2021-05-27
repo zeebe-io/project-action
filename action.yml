@@ -2,9 +2,6 @@ name: "project-action"
 description: "Automatically updates project information for issues"
 author: "zeebe-io"
 inputs:
-  github_token:
-    description: Token for the GitHub API
-    required: true
   project_type:
     description: "The type of project: org, repo, user. If project_id is specified, this is ignored."
     required: false
@@ -20,9 +17,6 @@ inputs:
     required: false
   project_name:
     description: "The name of the project"
-    required: false
-  project_id:
-    description: "The project's node ID if known in advance"
     required: false
 runs:
   using: "node12"

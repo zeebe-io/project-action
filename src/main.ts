@@ -6,21 +6,32 @@ import { Project } from "./project";
  * Called from the action.yml.
  */
 async function run(): Promise<void> {
-  const token = core.getInput("github_token", { required: true });
+  const token = process.env["GITHUB_TOKEN"];
+  if (!token || token === "") {
+    core.setFailed(
+      `No Github token provided; please specify a GITHUB_TOKEN environment variable`
+    );
+    return;
+  }
+
+  const projectId = process.env["PROJECT_ID"];
+  const required = !(projectId && projectId !== "");
+  const projectType = core.getInput("project_type", { required: required });
+  const projectOwner = core.getInput("project_owner", { required: required });
+  const projectName = core.getInput("project_name", { required: required });
+
+  const projectRepoRequired = required && projectType === "repo";
+  const projectRepo = core.getInput("project_repo", {
+    required: projectRepoRequired,
+  });
+
   const hub = new Github(token);
-
-  const project_type = core.getInput("project_type", { required: false });
-  const project_owner = core.getInput("project_owner", { required: false });
-  const project_repo = core.getInput("project_repo", { required: false });
-  const project_name = core.getInput("project_name", { required: false });
-  const project_id = core.getInput("project_id", { required: false });
-
   const input = new ProjectInput(
-    project_type,
-    project_owner,
-    project_repo,
-    project_name,
-    project_id
+    projectType,
+    projectOwner,
+    projectRepo,
+    projectName,
+    projectId
   );
   const project = new Project(input, hub);
 

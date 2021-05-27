@@ -8,14 +8,12 @@
  */
 
 import * as github from "@actions/github";
-import { WebhookPayload } from "@actions/github/lib/interfaces";
-import { type } from "os";
-import { report } from "process";
 
 export interface GithubApi {
   setProject(issueId: string, projectId: string): Promise<void>;
   getIssueId(): Promise<string>;
-  getProjectId(input: ProjectInput): Promise<string>;
+  listProjects(input: ProjectInput): Promise<Project[]>;
+  getProjectId(projects: Project[], input: ProjectInput): string;
 }
 
 export class Github implements GithubApi {
@@ -49,45 +47,25 @@ export class Github implements GithubApi {
         repo: this.#context.issue.repo,
         issue_number: this.#context.issue.number,
       })
-      .then((issue) => {
-        console.log(
-          `Found node ID issue #${issue.data.node_id} for issue #${
-            this.#context.issue.number
-          }`
-        );
-        return issue.data.node_id;
-      });
+      .then((issue) => issue.data.node_id);
   }
 
-  public async getProjectId(input: ProjectInput) {
-    if (input.id && input.id !== "") {
-      return Promise.resolve(input.id);
+  public getProjectId(projects: Project[], input: ProjectInput) {
+    const project = projects.find((project) => project.name === input.name);
+    if (project) {
+      return project.node_id;
+    } else {
+      throw `No project found with name ${input.name}`;
     }
-
-    return this.listProjects(input).then((projects) => {
-      console.log(
-        `Found #${projects?.length} projects for the given input: ${input}`
-      );
-      const projectId = projects!.find(
-        (project) => project.name === input.name
-      )!.node_id;
-
-      console.log(`Found ID ${projectId} for the given input: ${input}`);
-      return projectId;
-    });
   }
 
-  private async listProjects(input: ProjectInput) {
+  public async listProjects(input: ProjectInput) {
     if (input.type === "org") {
       return this.#octokit.projects
         .listForOrg({
           org: input.owner,
         })
-        .then((response) => response.data)
-        .catch((error) => {
-          console.error(error);
-          return [];
-        });
+        .then((response) => response.data);
     }
 
     if (input.type === "repo") {
@@ -106,7 +84,17 @@ export class Github implements GithubApi {
         })
         .then((response) => response.data);
     }
+
+    throw `Expected project type to be one of [org, repo, user], but was ${input.type}`;
   }
+}
+
+export interface Project {
+  node_id: string;
+  name: string;
+
+  // allows for any other additional properties we don't care about
+  [other: string]: any;
 }
 
 export class ProjectInput {
@@ -121,7 +109,7 @@ export class ProjectInput {
     owner: string,
     repo: string,
     name: string,
-    id: string
+    id: string | undefined
   ) {
     this.type = type;
     this.owner = owner;

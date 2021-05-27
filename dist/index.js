@@ -89,24 +89,17 @@ class Github {
                 repo: __classPrivateFieldGet(this, _context).issue.repo,
                 issue_number: __classPrivateFieldGet(this, _context).issue.number,
             })
-                .then((issue) => {
-                console.log(`Found node ID issue #${issue.data.node_id} for issue #${__classPrivateFieldGet(this, _context).issue.number}`);
-                return issue.data.node_id;
-            });
+                .then((issue) => issue.data.node_id);
         });
     }
-    getProjectId(input) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (input.id && input.id !== "") {
-                return Promise.resolve(input.id);
-            }
-            return this.listProjects(input).then((projects) => {
-                console.log(`Found #${projects === null || projects === void 0 ? void 0 : projects.length} projects for the given input: ${input}`);
-                const projectId = projects.find((project) => project.name === input.name).node_id;
-                console.log(`Found ID ${projectId} for the given input: ${input}`);
-                return projectId;
-            });
-        });
+    getProjectId(projects, input) {
+        const project = projects.find((project) => project.name === input.name);
+        if (project) {
+            return project.node_id;
+        }
+        else {
+            throw `No project found with name ${input.name}`;
+        }
     }
     listProjects(input) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -115,11 +108,7 @@ class Github {
                     .listForOrg({
                     org: input.owner,
                 })
-                    .then((response) => response.data)
-                    .catch((error) => {
-                    console.error(error);
-                    return [];
-                });
+                    .then((response) => response.data);
             }
             if (input.type === "repo") {
                 return __classPrivateFieldGet(this, _octokit).projects
@@ -136,6 +125,7 @@ class Github {
                 })
                     .then((response) => response.data);
             }
+            throw `Expected project type to be one of [org, repo, user], but was ${input.type}`;
         });
     }
 }
@@ -197,14 +187,22 @@ const project_1 = __nccwpck_require__(389);
  */
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = core.getInput("github_token", { required: true });
+        const token = process.env["GITHUB_TOKEN"];
+        if (!token || token === "") {
+            core.setFailed(`No Github token provided; please specify a GITHUB_TOKEN environment variable`);
+            return;
+        }
+        const projectId = process.env["PROJECT_ID"];
+        const required = !(projectId && projectId !== "");
+        const projectType = core.getInput("project_type", { required: required });
+        const projectOwner = core.getInput("project_owner", { required: required });
+        const projectName = core.getInput("project_name", { required: required });
+        const projectRepoRequired = required && projectType === "repo";
+        const projectRepo = core.getInput("project_repo", {
+            required: projectRepoRequired,
+        });
         const hub = new github_1.Github(token);
-        const project_type = core.getInput("project_type", { required: false });
-        const project_owner = core.getInput("project_owner", { required: false });
-        const project_repo = core.getInput("project_repo", { required: false });
-        const project_name = core.getInput("project_name", { required: false });
-        const project_id = core.getInput("project_id", { required: false });
-        const input = new github_1.ProjectInput(project_type, project_owner, project_repo, project_name, project_id);
+        const input = new github_1.ProjectInput(projectType, projectOwner, projectRepo, projectName, projectId);
         const project = new project_1.Project(input, hub);
         return project.run();
     });
@@ -259,13 +257,23 @@ class Project {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let projectId;
                 const issueId = yield this.hub.getIssueId();
-                const projectId = yield this.hub.getProjectId(this.input);
+                if (this.input.id && this.input.id !== "") {
+                    projectId = this.input.id;
+                }
+                else {
+                    const projects = yield this.hub.listProjects(this.input);
+                    if (projects.length == 0) {
+                        throw `No projects found for input ${this.input}`;
+                    }
+                    projectId = this.hub.getProjectId(projects, this.input);
+                }
                 yield this.hub.setProject(issueId, projectId);
-                console.log(`Assigned new issue to project ${this.input.name}`);
+                core.info(`Assigned new issue to project ${this.input.name}`);
             }
             catch (error) {
-                console.error(error.message);
+                core.error(error.message);
                 core.setFailed(error.message);
             }
         });

@@ -13,8 +13,9 @@ jobs:
           fetch-depth: 0
       - name: Assign to project
         uses: zeebe-io/project-action@develop
+        env:
+          GITHUB_TOKEN: ${{ secrets.READ_ONLY_TOKEN }}
         with:
-          github_token: ${{ secrets.ORG_TOKEN }}
           project_type: "org"
           project_owner: "zeebe-io"
           project_name: "Zeebe"

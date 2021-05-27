@@ -59,7 +59,7 @@ jobs:
 
 ### Organization project
 
-For organization project, the default GITHUB_TOKEN is typically not enough. You will need to create a new token with admin rights for your organization, and create a secret to hold that token.
+For organization project, the default GITHUB_TOKEN is typically not enough. You will need to create a new token with admin read rights for your organization, and create a secret to hold that token.
 
 For organization projects, you only need to specify the type, owner, and name of the project. In this case, owner refers to the organization itself.
 
@@ -85,7 +85,7 @@ jobs:
 
 ### User project
 
-For a user project, the default GITHUB_TOKEN is typically not enough. You will need to create a new token with admin rights for such a project, and create a secret to hold that token.
+For a user project, the default GITHUB_TOKEN is typically not enough. You will need to create a new token with admin read rights for such a project, and create a secret to hold that token.
 
 For user projects, you only need to specify the type, owner, and name of the project. In this case, owner refers to the username of the user owning the project.
 

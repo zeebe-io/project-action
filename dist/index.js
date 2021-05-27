@@ -42,29 +42,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _octokit, _context;
+var _Github_octokit, _Github_context;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProjectInput = exports.Github = void 0;
 const github = __importStar(__nccwpck_require__(438));
 class Github {
     constructor(token) {
-        _octokit.set(this, void 0);
-        _context.set(this, void 0);
-        __classPrivateFieldSet(this, _octokit, github.getOctokit(token));
-        __classPrivateFieldSet(this, _context, github.context);
+        _Github_octokit.set(this, void 0);
+        _Github_context.set(this, void 0);
+        __classPrivateFieldSet(this, _Github_octokit, github.getOctokit(token), "f");
+        __classPrivateFieldSet(this, _Github_context, github.context, "f");
     }
     setProject(issueId, projectId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -78,16 +76,16 @@ class Github {
             }
         }
     `;
-            return __classPrivateFieldGet(this, _octokit).graphql(query, variables).then((response) => { });
+            return __classPrivateFieldGet(this, _Github_octokit, "f").graphql(query, variables).then((response) => { });
         });
     }
     getIssueId() {
         return __awaiter(this, void 0, void 0, function* () {
-            return __classPrivateFieldGet(this, _octokit).rest.issues
+            return __classPrivateFieldGet(this, _Github_octokit, "f").rest.issues
                 .get({
-                owner: __classPrivateFieldGet(this, _context).issue.owner,
-                repo: __classPrivateFieldGet(this, _context).issue.repo,
-                issue_number: __classPrivateFieldGet(this, _context).issue.number,
+                owner: __classPrivateFieldGet(this, _Github_context, "f").issue.owner,
+                repo: __classPrivateFieldGet(this, _Github_context, "f").issue.repo,
+                issue_number: __classPrivateFieldGet(this, _Github_context, "f").issue.number,
             })
                 .then((issue) => issue.data.node_id);
         });
@@ -104,14 +102,14 @@ class Github {
     listProjects(input) {
         return __awaiter(this, void 0, void 0, function* () {
             if (input.type === "org") {
-                return __classPrivateFieldGet(this, _octokit).rest.projects
+                return __classPrivateFieldGet(this, _Github_octokit, "f").rest.projects
                     .listForOrg({
                     org: input.owner,
                 })
                     .then((response) => response.data);
             }
             if (input.type === "repo") {
-                return __classPrivateFieldGet(this, _octokit).rest.projects
+                return __classPrivateFieldGet(this, _Github_octokit, "f").rest.projects
                     .listForRepo({
                     owner: input.owner,
                     repo: input.repo,
@@ -119,7 +117,7 @@ class Github {
                     .then((response) => response.data);
             }
             if (input.type === "user") {
-                return __classPrivateFieldGet(this, _octokit).rest.projects
+                return __classPrivateFieldGet(this, _Github_octokit, "f").rest.projects
                     .listForUser({
                     username: input.owner,
                 })
@@ -130,7 +128,7 @@ class Github {
     }
 }
 exports.Github = Github;
-_octokit = new WeakMap(), _context = new WeakMap();
+_Github_octokit = new WeakMap(), _Github_context = new WeakMap();
 class ProjectInput {
     constructor(type, owner, repo, name, id) {
         this.type = type;

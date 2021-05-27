@@ -11,6 +11,27 @@ This action can assign any project to a given issue, with the following caveats:
 - If you have multiple projects with the same name, the behavior is undefined
 - If the issue is already assigned to a project, it will potentially overwrite it. If it's already assigned to the same project, nothing happens.
 
+## Usage
+
+The action accepts two environment variables, and 4 optional arguments:
+
+### Environment variables
+
+- `GITHUB_TOKEN`: it reads the token to use for authentication with the API via environment variables
+- `PROJECT_ID`: if you already know the project's node ID (not the number in the URL), then you can set it here and it will skip the steps of finding the right project. This is the workaround if you have multiple projects of the same name.
+
+### Arguments/input
+
+> NOTE: all of this can be omitted if you specify the `PROJECT_ID`. They are only used to find the project ID. Otherwise, the project type, owner, and name, are all mandatory.
+
+- `project_type`: one of `org`, `repo`, `user`. Select `org` if your project is owned by an organization, `repo` if it's under a particular repository, and `user` if it's a user project.
+- `project_owner`: depending on the type, it will be: 
+    - `org`: the organization key, e.g. `zeebe-io` here
+    - `repo`: the repo's owner, e.g. `zeebe-io` here.
+    - `user`: the username of repo's owner
+- `project_repo`: the name of the repository. Only required if the type is `repo`.
+- `project_name`: the name of the project, case-sensitive.
+
 ## Examples
 
 ### Repository project

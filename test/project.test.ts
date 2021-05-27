@@ -1,5 +1,5 @@
 // Placeholder for tests
 
-test('tautology', () => {
+test("tautology", () => {
   expect(true).toBe(true);
 });

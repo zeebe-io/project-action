@@ -16,6 +16,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.READ_ONLY_TOKEN }}
         with:
-          project_type: "org"
+          project_type: "repo"
           project_owner: "zeebe-io"
-          project_name: "Zeebe"
+          project_repo: "project-action"
+          project_name: "Test"

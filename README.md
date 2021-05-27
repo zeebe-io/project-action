@@ -10,6 +10,7 @@ This action can assign any project to a given issue, with the following caveats:
 - You may need to specify a different GITHUB_TOKEN if you need privileged permissions, e.g. access organization projects
 - If you have multiple projects with the same name, the behavior is undefined
 - If the issue is already assigned to a project, it will potentially overwrite it. If it's already assigned to the same project, nothing happens.
+- Unless you know the node ID of the project, the project _must_ be public, otherwise it will not show up when listing projects.
 
 ## Usage
 

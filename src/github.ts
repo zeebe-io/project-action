@@ -41,7 +41,7 @@ export class Github implements GithubApi {
   }
 
   public async getIssueId() {
-    return this.#octokit.issues
+    return this.#octokit.rest.issues
       .get({
         owner: this.#context.issue.owner,
         repo: this.#context.issue.repo,
@@ -61,7 +61,7 @@ export class Github implements GithubApi {
 
   public async listProjects(input: ProjectInput) {
     if (input.type === "org") {
-      return this.#octokit.projects
+      return this.#octokit.rest.projects
         .listForOrg({
           org: input.owner,
         })
@@ -69,7 +69,7 @@ export class Github implements GithubApi {
     }
 
     if (input.type === "repo") {
-      return this.#octokit.projects
+      return this.#octokit.rest.projects
         .listForRepo({
           owner: input.owner,
           repo: input.repo,
@@ -78,7 +78,7 @@ export class Github implements GithubApi {
     }
 
     if (input.type === "user") {
-      return this.#octokit.projects
+      return this.#octokit.rest.projects
         .listForUser({
           username: input.owner,
         })

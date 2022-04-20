@@ -1,3 +1,5 @@
+# If you use the new beta projects, you'll be better off using the official action: [actions/add-to-project](https://github.com/actions/add-to-project)
+
 # Project Action
 
 A small Github Action which can assign a project to issues.
